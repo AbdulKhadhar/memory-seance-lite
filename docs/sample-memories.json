@@ -1,0 +1,7 @@
+[
+  {"title": "Tomatoes in coffee cans", "subject": "Abuela Marisol", "text": "Abuela Marisol grew tomatoes in old coffee cans along the back fence and gave every plant a name. The biggest one was called Don Ramón.", "tags": "garden, summer", "date": "2011-07-14"},
+  {"title": "Sunday pan dulce", "subject": "Abuela Marisol", "text": "Every Sunday she walked to the corner bakery before church and came back with conchas wrapped in paper. She always saved the pink one for me.", "tags": "food, family"},
+  {"title": "Her radio", "subject": "Abuela Marisol", "text": "She kept a yellow radio on the kitchen windowsill, tuned to old boleros, and hummed while she shelled beans.", "tags": "music, kitchen"},
+  {"title": "Why Lumen stopped", "subject": "Lumen RSS", "text": "Lumen RSS was my abandoned feed reader. I stopped working on it after version 0.3 when the parser rewrite got too big for evenings after work.", "tags": "project, software", "date": "2020-03-02"},
+  {"title": "The first commit", "subject": "Lumen RSS", "text": "The first commit was at 2 a.m. and just said 'it fetches one feed'. I was ridiculously proud of it.", "tags": "project"}
+]

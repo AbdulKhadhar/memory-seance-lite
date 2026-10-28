@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memory Séance Lite</title>
+  <meta name="description" content="A private, local-first memorial storytelling app.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23f4a52b'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23ffe3a3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top">
+    <div class="banner" aria-hidden="true"></div>
+    <div class="wrap head">
+      <div>
+        <h1>Memory Séance Lite</h1>
+        <p class="tag">Write down the stories you don't want to lose. A small model on your own computer helps you light a candle for them.</p>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite">Checking Ollama…</p>
+    </div>
+    <p class="wrap notice" id="disclaimer">
+      The séance is a creative memorial conversation. It is not communication with a deceased person.
+      Answers come only from the memories you write, and your memories stay in a SQLite file on this computer.
+    </p>
+    <nav class="wrap" aria-label="Sections">
+      <button type="button" data-tab="memories" aria-current="page">Memories</button>
+      <button type="button" data-tab="ofrenda" aria-current="false">Ofrenda</button>
+      <button type="button" data-tab="seance" aria-current="false">Séance</button>
+      <button type="button" data-tab="settings" aria-current="false">Settings</button>
+    </nav>
+  </header>
+
+  <main id="main" class="wrap">
+    <p id="toast" class="toast" role="status" aria-live="polite"></p>
+
+    <section id="panel-memories" class="panel" aria-labelledby="h-memories">
+      <h2 id="h-memories">Memories</h2>
+      <form id="memory-form" class="card form" novalidate>
+        <input type="hidden" id="memory-id">
+        <h3 id="form-title">Add a memory</h3>
+        <div class="row">
+          <label>Title <input id="m-title" required maxlength="120" placeholder="Tomatoes behind the house"></label>
+          <label>Person, pet, place, or project <input id="m-subject" required maxlength="80" list="subject-list" placeholder="Abuela Marisol"></label>
+        </div>
+        <datalist id="subject-list"></datalist>
+        <label>What do you remember? <textarea id="m-text" required rows="4" maxlength="2000" placeholder="She grew tomatoes in coffee cans and named every plant."></textarea></label>
+        <div class="row">
+          <label>Tags, optional <input id="m-tags" maxlength="200" placeholder="garden, summer"></label>
+          <label>Date, optional <input id="m-date" type="date"></label>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit" id="m-save">Save memory</button>
+          <button type="button" id="m-cancel" hidden>Cancel edit</button>
+        </div>
+      </form>
+      <p id="memory-empty" class="empty" hidden>Nothing saved yet. Write the first small, true thing you remember above.</p>
+      <ul id="memory-list" class="list"></ul>
+    </section>
+
+    <section id="panel-ofrenda" class="panel" aria-labelledby="h-ofrenda" hidden>
+      <h2 id="h-ofrenda">Ofrenda</h2>
+      <p class="lede">Choose who or what to remember. The model writes a short remembrance using only the saved memories (the 4 most recent at most).</p>
+      <form id="ofrenda-form" class="card form row-inline">
+        <label>Remember <select id="o-subject" required></select></label>
+        <button class="primary" type="submit" id="o-go">Light the candle</button>
+      </form>
+      <div id="ofrenda-result" aria-live="polite"></div>
+      <h3>Saved ofrendas</h3>
+      <p id="ofrenda-empty" class="empty">No ofrendas yet.</p>
+      <ul id="ofrenda-list" class="list"></ul>
+    </section>
+
+    <section id="panel-seance" class="panel" aria-labelledby="h-seance" hidden>
+      <h2 id="h-seance">Memory séance</h2>
+      <p class="lede">Ask a question. The narrator answers only from your memories and shows which ones it used. If nothing fits, it will say so.</p>
+      <div id="chat-log" class="chat" aria-live="polite"></div>
+      <form id="seance-form" class="card form">
+        <div class="row">
+          <label>Your question <input id="s-question" required minlength="2" maxlength="500" placeholder="What did she grow in the garden?"></label>
+          <label>Limit to <select id="s-subject"><option value="">Everything</option></select></label>
+        </div>
+        <div class="actions"><button class="primary" type="submit" id="s-go">Ask</button></div>
+      </form>
+    </section>
+
+    <section id="panel-settings" class="panel" aria-labelledby="h-settings" hidden>
+      <h2 id="h-settings">Settings</h2>
+      <form id="settings-form" class="card form">
+        <div class="row">
+          <label>Model <select id="set-model"></select></label>
+          <label>Ollama URL <input id="set-url" required placeholder="http://localhost:11434"></label>
+        </div>
+        <p class="hint">gemma3:1b is the default. On a very low-memory computer choose qwen3:0.6b. Run <code>ollama pull &lt;model&gt;</code> once to install it.</p>
+        <div class="actions">
+          <button class="primary" type="submit">Save settings</button>
+          <button type="button" id="set-test">Test connection</button>
+        </div>
+      </form>
+      <div class="card danger">
+        <h3>Your data</h3>
+        <p>Everything is stored in <code>data/memory_seance.db</code> on this computer. Nothing is uploaded anywhere.</p>
+        <button type="button" id="delete-all" class="warn">Delete all memories</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Your memories stay on your machine. Open source (MIT). Built with Ollama, SQLite and FastAPI.</p>
+  </footer>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

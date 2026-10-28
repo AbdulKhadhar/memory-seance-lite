@@ -1,0 +1,40 @@
+name: Demo report
+
+# Manual run only: Actions tab -> "Demo report" -> Run workflow.
+#
+# This workflow deliberately does NOT run a real language model. Reasons:
+#   1. Low-resource machines: hosted runners are not a fair stand-in for the modest hardware
+#      this project targets, and a 1B model there says nothing about your own computer.
+#   2. Model download size: pulling gemma3:1b on every run wastes time and bandwidth.
+#   3. Reproducibility: generated text varies run to run, so a CI "demo" would be unreliable.
+# Instead it produces a Markdown build report from the mocked test suite. Record the real
+# demo locally by following docs/demo-script.md.
+on:
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Run tests (LLM mocked)
+        run: pytest -q --junitxml=report.xml
+      - name: Build report
+        if: always()
+        run: python scripts/build_report.py report.xml build-report.md
+      - name: Publish summary
+        if: always()
+        run: cat build-report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-report
+          path: |
+            build-report.md
+            report.xml
