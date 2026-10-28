@@ -64,15 +64,26 @@ def list_models(base_url, client=None, timeout=5.0):
 
 
 def chat(messages, model, base_url, *, json_mode=False, timeout=120.0, max_tokens=400, client=None):
+    # Resource and memory optimized options:
+    # - num_ctx: 2048 prevents unbounded KV cache memory consumption
+    # - num_predict: bounds generated token buffer
+    # - num_batch: 128 reduces peak memory during prompt evaluation
+    # - keep_alive: '5m' frees RAM/VRAM after 5 minutes of inactivity instead of staying loaded indefinitely
     payload = {
         "model": model,
         "messages": messages,
         "stream": False,
-        "options": {"temperature": 0.3, "num_ctx": 2048, "num_predict": max_tokens},
+        "keep_alive": "5m",
+        "options": {
+            "temperature": 0.3,
+            "num_ctx": 2048,
+            "num_predict": max_tokens,
+            "num_batch": 128,
+        },
     }
     if json_mode:
         payload["format"] = "json"
-    if model.startswith("qwen3"):
+    if model.startswith("qwen3") or model.startswith("qwen2"):
         payload["think"] = False  # skip the slow reasoning trace on tiny machines
     owns = client is None
     client = client or httpx.Client(timeout=timeout)

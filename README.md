@@ -44,6 +44,20 @@ flowchart LR
 
 **Why FastAPI?** Python's standard library already provides SQLite (with FTS5 in nearly all builds), so the whole backend needs only three small packages: `fastapi`, `uvicorn` and `httpx`. No Node toolchain, no `node_modules`, and request validation comes built in.
 
+### Resource & Disk Optimization Practices
+- **SQLite Performance & Footprint**:
+  - `PRAGMA journal_mode=WAL` with `synchronous=NORMAL`: Concurrent reads without lock contention, eliminating write stalls while protecting data integrity.
+  - `PRAGMA cache_size=-2000`: Strict ~2MB page cache cap to prevent uncontrolled memory inflation on tiny machines.
+  - `PRAGMA temp_store=MEMORY`: Keeps ephemeral sorts and search tables in RAM to reduce disk churn and SSD write wear.
+  - Automatic `VACUUM` compaction on data deletion to reclaim disk space immediately.
+- **Model Memory Management**:
+  - `keep_alive="5m"`: Automatically unloads the model from RAM/VRAM after 5 minutes of inactivity so your background memory is returned to the OS.
+  - Bounded context window (`num_ctx=2048`) and batching (`num_batch=128`): Bounds KV cache allocations and peak evaluation RAM.
+- **Multi-Tier Fallbacks**:
+  - **Retrieval Fallback**: Automatically tries SQLite FTS5 BM25 ranked search; if FTS5 is not compiled into the local SQLite build, cleanly falls back to pure-Python token/stemming scoring without failing.
+  - **Model Architecture Fallback**: Seamlessly supports ultra-lightweight models (such as `qwen3:0.6b` or `qwen2.5:1.5b`) with reasoning traces disabled (`think=False`) for CPU-only systems.
+  - **Structured Generation Fallback**: Dual-attempt retry on JSON generation for tiny models, with markdown/sub-string extraction fallback if the model outputs conversational preamble.
+
 ## Screenshots
 
 ![Memories Tab](docs/screenshot-memories.png)

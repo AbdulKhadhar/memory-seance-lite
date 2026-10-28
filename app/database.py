@@ -64,6 +64,21 @@ class Database:
         self.conn.row_factory = sqlite3.Row
         self.fts_enabled = False
         with self._lock:
+            # Memory and disk optimization pragmas:
+            # - WAL journal mode: concurrent reads without locking, efficient writes
+            # - synchronous=NORMAL: safe in WAL mode while avoiding heavy disk flush stalls
+            # - cache_size=-2000: limits in-memory page cache to ~2 MB
+            # - temp_store=MEMORY: keeps temporary tables/sorts in memory without disk churn
+            # - mmap_size=268435456: allows memory-mapped I/O up to 256MB if supported
+            # - auto_vacuum=INCREMENTAL: enables automatic unused page reclamation
+            try:
+                self.conn.execute("PRAGMA journal_mode=WAL")
+                self.conn.execute("PRAGMA synchronous=NORMAL")
+                self.conn.execute("PRAGMA cache_size=-2000")
+                self.conn.execute("PRAGMA temp_store=MEMORY")
+                self.conn.execute("PRAGMA mmap_size=268435456")
+            except sqlite3.OperationalError:
+                pass
             self.conn.executescript(SCHEMA)
             try:
                 self.conn.executescript(FTS_SCHEMA)
