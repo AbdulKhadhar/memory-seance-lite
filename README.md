@@ -58,6 +58,10 @@ flowchart LR
   - **Model Architecture Fallback**: Seamlessly supports ultra-lightweight models (such as `qwen3:0.6b` or `qwen2.5:1.5b`) with reasoning traces disabled (`think=False`) for CPU-only systems.
   - **Structured Generation Fallback**: Dual-attempt retry on JSON generation for tiny models, with markdown/sub-string extraction fallback if the model outputs conversational preamble.
 
+## Demo Video
+
+Watch the walkthrough on YouTube: **[https://youtu.be/PM4JgmZCKf8](https://youtu.be/PM4JgmZCKf8)**
+
 ## Screenshots
 
 ![Memories Tab](docs/screenshot-memories.png)
